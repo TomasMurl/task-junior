@@ -1,0 +1,78 @@
+version: '2.10.2'
+services:
+
+  # # # Elasticsearch
+  elastic.local:
+    image: elasticsearch:8.1.3
+    container_name: elasticsearch
+    restart: always
+    #
+    volumes:
+     - ./elasticsearch/data:/usr/share/elasticsearch/data/
+     - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+
+     - ./certs/elasticsearch.crt:/usr/share/elasticsearch/config/certs/elasticsearch.crt
+     - ./certs/elasticsearch.key:/usr/share/elasticsearch/config/certs/elasticsearch.key
+     - ./certs/ca.crt:/usr/share/elasticsearch/config/certs/ca.crt
+    # - ./certs/ca.key:/usr/share/elastic/config/certs/ca.key
+
+    # - ./elasticsearch/config/certs:/usr/share/elasticsearch/config/certs/
+    #
+    ports:
+      - 9200:9200
+      - 9300:9300
+    #
+    healthcheck:
+      test: curl --cacert /usr/share/elasticsearch/config/certs/ca.crt https://elastic.local:9200/ | grep -q 'missing authentication credentials'
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    #
+    mem_limit: 4096m
+
+  # # # Kibana
+  kibana.local:
+    depends_on:
+      elastic.local:
+        condition: service_healthy
+    image: kibana:8.1.3
+    container_name: kibana
+    restart: always
+    #
+    volumes:  
+      - ./kibana/data:/usr/share/kibana/data/  
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+      
+      - ./certs/kibana.crt:/usr/share/kibana/config/certs/kibana.crt
+      - ./certs/kibana.key:/usr/share/kibana/config/certs/kibana.key
+      - ./certs/ca.crt:/usr/share/kibana/config/certs/ca.crt
+
+      #- ./kibana/config/certs:/usr/share/kibana/config/certs
+    #
+    ports:
+     - 5601:5601
+    #
+    mem_limit: 2048m
+
+  # # # Logstash
+  logstash.local:
+    depends_on:
+      elastic.local:
+        condition: service_healthy
+    image: logstash:8.1.3
+    container_name: logstash
+    restart: always
+    #
+    volumes:
+      - ./logstash/config/logstash.conf:/usr/share/logstash/config/logstash.conf
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+
+      - ./certs/logstash.crt:/usr/share/logstash/config/certs/logstash.crt
+      - ./certs/logstash.pkcs8.key:/usr/share/logstash/config/certs/logstash.pkcs8.key
+      - ./certs/ca.crt:/usr/share/logstash/config/certs/ca.crt
+
+     # - ./logstash/config/certs:/usr/share/logstash/config/certs
+    ports:
+      - 5044:5044
+    #
+    mem_limit: 2048m

@@ -1,0 +1,11 @@
+services:
+  ml-container:
+    build: .
+    ports:
+      - 443:443
+    volumes:
+      - ./cert:/home/cert
+      - ./nginx.conf:/home/nginx.conf
+      - ./distilbert-base-cased-finetuned-conll03-english:/home/models/distilbert-base-cased-finetuned-conll03-english
+    environment:
+      - model_path=/home/models/distilbert-base-cased-finetuned-conll03-english

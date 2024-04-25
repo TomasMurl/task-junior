@@ -1,0 +1,12 @@
+image:
+  repository: tommymurl/simpleserver
+  tag: latest
+
+ingress:
+  enabled: true
+  hosts:
+    - example.com
+
+persistence:
+  enabled: true
+  mountPath: /app/data

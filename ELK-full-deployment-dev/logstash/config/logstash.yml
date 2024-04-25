@@ -1,0 +1,13 @@
+node.name: logstash.local
+http.host: 0.0.0.0 
+
+path.config: "/usr/share/logstash/config/logstash.conf"
+
+xpack.monitoring.elasticsearch.hosts:
+- https://elastic.local:9200
+
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.ssl.certificate_authority:  "/usr/share/logstash/config/certs/ca.crt"
+
+xpack.monitoring.elasticsearch.username: logstash_system
+xpack.monitoring.elasticsearch.password: 5*wdz35-rFOBQ6a_y*P3

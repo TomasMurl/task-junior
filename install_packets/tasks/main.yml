@@ -1,0 +1,19 @@
+---
+# tasks file for install_packets
+  - name: Packets installation
+    dnf:
+      name:
+        - nmap
+        - traceroute
+        - vim
+        - curl
+        - htop
+      state: latest
+
+  - name: DNS configuration
+    lineinfile:
+      path: "/etc/resolv.conf"
+      line: "{{ item }}"
+    with_items:
+      - nameserver 8.8.8.8
+      - nameserver 1.1.1.1

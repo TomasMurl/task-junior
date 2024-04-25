@@ -1,0 +1,8 @@
+---
+- name: Packets installing and ELK
+  hosts: all
+  become: yes
+
+  roles:
+    # - install_packets
+    - elk_deploy

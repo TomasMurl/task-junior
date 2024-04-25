@@ -1,0 +1,105 @@
+---
+# tasks file for elk_deploy
+# - name: Install Docker
+#   pacman:
+#     name: docker
+#     state: present
+
+# - name: Start Docker service
+#   service:
+#     name: docker
+#     state: started
+
+- name: Create directory for ELK data
+  file:
+    path: /home/tomas/elk/
+    state: directory
+
+- name: Certs
+  copy:
+    src: "certs"
+    dest: "/home/tomas/elk/"
+
+- name: Copy Elasticsearch configuration file
+  copy:
+    src: "elasticsearch"
+    dest: "/home/tomas/elk/"
+  
+- name: Copy Kibana configuration file
+  copy:
+    src: "kibana"
+    dest: "/home/tomas/elk/"
+
+- name: Copy Logstash configuration file
+  copy:
+    src: "logstash"
+    dest: "/home/tomas/elk/"
+
+- name: Create directory for Kibana data
+  file:
+    path: /home/tomas/elk/kibana/data
+    state: directory
+
+- name: Create directory for Elasticsearch data
+  file:
+    path: /home/tomas/elk/elasticsearch/data
+    state: directory
+
+- name: Full rights
+  file:
+    dest: /home/tomas/elk
+    recurse: yes
+    state: directory
+    mode: 0666
+
+
+
+- name: Deploy Elastic
+  docker_container:
+    name: "elastic.local"
+    image: "docker.elastic.co/elasticsearch/elasticsearch:8.1.3"
+    state: started
+    restart_policy: always
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+    volumes:
+      - "/home/tomas/elk/elasticsearch/data:/usr/share/elasticsearch/data"
+      - "/home/tomas/elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml"
+
+      - "/home/tomas/elk/certs/elasticsearch.crt:/usr/share/elasticsearch/config/certs/elasticsearch.crt"
+      - "/home/tomas/elk/certs/elasticsearch.key:/usr/share/elasticsearch/config/certs/elasticsearch.key"
+      - "/home/tomas/elk/certs/ca.crt:/usr/share/elasticsearch/config/certs/ca.crt"
+
+- name: Deploy Kibana
+  docker_container:
+    name: "kibana.local"
+    image: "docker.elastic.co/kibana/kibana:8.1.3"
+    state: started
+    restart_policy: always
+    ports:
+      - "5044:5044"
+    volumes:  
+      - "/home/tomas/elk/kibana/data:/usr/share/kibana/data"
+      - "/home/tomas/elk/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml"
+      
+      - "/home/tomas/elk/certs/kibana.crt:/usr/share/kibana/config/certs/kibana.crt"
+      - "/home/tomas/elk/certs/kibana.key:/usr/share/kibana/config/certs/kibana.key"
+      - "/home/tomas/elk/certs/ca.crt:/usr/share/kibana/config/certs/ca.crt"
+
+- name: Deploy Logstash
+  docker_container:
+    name: "logstash.local"
+    image: "docker.elastic.co/logstash/logstash:8.1.3"
+    state: started
+    restart_policy: always
+    ports:
+      - "5601:5601"
+    volumes:
+      - "/home/tomas/elk/logstash/config/logstash.conf:/usr/share/logstash/config/logstash.conf"
+      - "/home/tomas/elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml"
+
+      - "/home/tomas/elk/certs/logstash.crt:/usr/share/logstash/config/certs/logstash.crt"
+      - "/home/tomas/elk/certs/logstash.pkcs8.key:/usr/share/logstash/config/certs/logstash.pkcs8.key"
+      - "/home/tomas/elk/certs/ca.crt:/usr/share/logstash/config/certs/ca.crt"
