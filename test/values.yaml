@@ -2,11 +2,16 @@ image:
   repository: tommymurl/simpleserver
   tag: latest
 
+service:
+  port: 8080
+
 ingress:
   enabled: true
+  className: nginx
   hosts:
     - example.com
 
 persistence:
   enabled: true
-  mountPath: /app/data
+  hostPath: /run/desktop/mnt/host/c/users/tomas/desktop/task-junior/testvolume
+  containerPath: /app/data
