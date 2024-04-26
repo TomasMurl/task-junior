@@ -4,5 +4,5 @@
   become: yes
 
   roles:
-    # - install_packets
+    - install_packets
     - elk_deploy
